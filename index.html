@@ -88,7 +88,6 @@
 
 <body>
 
-  <!-- LOGIN -->
   <div id="loginOverlay" class="overlay">
 
     <div class="modal">
@@ -114,6 +113,7 @@
   <script type="module">
 
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
+
     import {
       getAuth,
       onAuthStateChanged,
@@ -122,10 +122,13 @@
     } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
 
     const firebaseConfig = {
-      apiKey: "WSTAW_TU",
-      authDomain: "WSTAW_TU",
-      projectId: "WSTAW_TU",
-      appId: "WSTAW_TU"
+      apiKey: "AIzaSyAAGPNktzjNlqXirf4bq-MVYRynW88oiP4",
+      authDomain: "fraseo-marketing-digital.firebaseapp.com",
+      projectId: "fraseo-marketing-digital",
+      storageBucket: "fraseo-marketing-digital.firebasestorage.app",
+      messagingSenderId: "238473898395",
+      appId: "1:238473898395:web:ec7763b50c31d486d6193e",
+      measurementId: "G-E467P2RFWZ"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -136,18 +139,25 @@
       "k.binuta@icloud.com"
     ];
 
-    const loginOverlay = document.getElementById("loginOverlay");
     const errorMessage = document.getElementById("errorMessage");
 
     document.getElementById("loginBtn").onclick = async () => {
 
-      const email = document.getElementById("email").value;
+      errorMessage.style.display = "none";
+
+      const email = document.getElementById("email").value.trim().toLowerCase();
+
       const password = document.getElementById("password").value;
 
       try {
+
         await signInWithEmailAndPassword(auth, email, password);
+
       } catch (e) {
+
         errorMessage.style.display = "block";
+        errorMessage.innerText = "Invalid login or password";
+
       }
 
     };
@@ -156,13 +166,17 @@
 
       if (!user) return;
 
-      if (allowedUsers.includes(user.email)) {
+      const userEmail = user.email.toLowerCase();
+
+      if (allowedUsers.includes(userEmail)) {
 
         window.location.href = "https://xpanol.github.io/CUSTOMEE/";
 
       } else {
 
         errorMessage.style.display = "block";
+        errorMessage.innerText = "Access denied for this account";
+
         signOut(auth);
 
       }
