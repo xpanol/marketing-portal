@@ -4,19 +4,14 @@
 <head>
 
   <meta charset="UTF-8">
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>MARKETING DIGITAL | DIGITAL MARKETING BY XPAÑOL</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
-
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-  <link
-    href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap"
-    rel="stylesheet"
-  >
+  <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
 
   <style>
 
@@ -32,18 +27,7 @@
       font-family: 'Special Elite', cursive;
     }
 
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6,
-    p,
-    span,
-    button,
-    input,
-    textarea,
-    div {
+    h1, h2, p, input, button, div {
       font-family: 'Special Elite', cursive;
     }
 
@@ -54,8 +38,7 @@
     }
 
     h1 {
-      margin-top: 0;
-      margin-bottom: 24px;
+      margin: 0 0 24px 0;
       font-size: 42px;
       line-height: 1.4;
     }
@@ -96,24 +79,22 @@
     }
 
     .modal h2 {
-      margin-top: 0;
-      margin-bottom: 14px;
+      margin: 0 0 14px 0;
       font-size: 28px;
       line-height: 1.5;
     }
 
     .xpanyol {
       display: block;
-      margin-top: 10px;
+      margin-top: 8px;
       font-size: 18px;
     }
 
     .modal p {
-      margin-top: 0;
-      margin-bottom: 26px;
+      margin: 0 0 26px 0;
       color: #666;
       font-size: 15px;
-      line-height: 1.7;
+      line-height: 1.6;
     }
 
     .modal input {
@@ -122,9 +103,8 @@
       padding: 14px;
       border: 1px solid #ccc;
       border-radius: 10px;
-      background: white;
-      color: #111;
       font-size: 15px;
+      background: white;
     }
 
     .modal button {
@@ -159,20 +139,14 @@
 
     <h1>
       MARKETING DIGITAL | DIGITAL MARKETING
-      <br>
-      <span class="xpanyol">
-        BY XPAÑOL
-      </span>
+      <span class="xpanyol">BY XPAÑOL</span>
     </h1>
 
     <p>
-      This content is visible only to authenticated users.
+      This content is visible only to authorized users.
     </p>
 
-    <button
-      class="logout-btn"
-      onclick="logout()"
-    >
+    <button class="logout-btn" onclick="logout()">
       Sign out
     </button>
 
@@ -184,36 +158,20 @@
 
       <h2>
         MARKETING DIGITAL | DIGITAL MARKETING
-        <br>
-        <span class="xpanyol">
-          BY XPAÑOL
-        </span>
+        <span class="xpanyol">BY XPAÑOL</span>
       </h2>
 
       <p>
-        Please enter your credentials to continue.
+        Please sign in to continue.
       </p>
 
-      <input
-        id="email"
-        type="email"
-        placeholder="Email"
-        autocomplete="username"
-      >
+      <input id="email" type="email" placeholder="Email">
+      <input id="password" type="password" placeholder="Password">
 
-      <input
-        id="password"
-        type="password"
-        placeholder="Password"
-        autocomplete="current-password"
-      >
-
-      <button id="loginBtn">
-        Sign in
-      </button>
+      <button id="loginBtn">Sign in</button>
 
       <div id="errorMessage" class="error">
-        Invalid email or password.
+        Access denied or invalid credentials.
       </div>
 
     </div>
@@ -222,62 +180,44 @@
 
   <script type="module">
 
-    import { initializeApp }
-      from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
 
     import {
       getAuth,
       onAuthStateChanged,
       signInWithEmailAndPassword,
       signOut
-    }
-      from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
+    } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
 
     const firebaseConfig = {
-
       apiKey: "WSTAW_TU",
-
       authDomain: "WSTAW_TU",
-
       projectId: "WSTAW_TU",
-
       appId: "WSTAW_TU"
-
     };
 
     const app = initializeApp(firebaseConfig);
-
     const auth = getAuth(app);
 
-    const overlay =
-      document.getElementById("loginOverlay");
+    const allowedUsers = [
+      "test@client.com"
+    ];
 
-    const protectedContent =
-      document.getElementById("protectedContent");
-
-    const loginBtn =
-      document.getElementById("loginBtn");
-
-    const errorMessage =
-      document.getElementById("errorMessage");
+    const overlay = document.getElementById("loginOverlay");
+    const protectedContent = document.getElementById("protectedContent");
+    const loginBtn = document.getElementById("loginBtn");
+    const errorMessage = document.getElementById("errorMessage");
 
     loginBtn.onclick = async () => {
 
       errorMessage.style.display = "none";
 
-      const email =
-        document.getElementById("email").value;
-
-      const password =
-        document.getElementById("password").value;
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
 
       try {
 
-        await signInWithEmailAndPassword(
-          auth,
-          email,
-          password
-        );
+        await signInWithEmailAndPassword(auth, email, password);
 
       } catch (e) {
 
@@ -289,26 +229,26 @@
 
     onAuthStateChanged(auth, (user) => {
 
-      if (user) {
+      if (user && allowedUsers.includes(user.email)) {
 
         overlay.style.display = "none";
-
         protectedContent.style.display = "block";
 
       } else {
 
         overlay.style.display = "flex";
-
         protectedContent.style.display = "none";
+
+        if (user) {
+          signOut(auth);
+        }
 
       }
 
     });
 
     window.logout = async function () {
-
       await signOut(auth);
-
     };
 
   </script>
