@@ -121,6 +121,12 @@
       signOut
     } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
 
+    import {
+      getFirestore,
+      doc,
+      getDoc
+    } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
+
     const firebaseConfig = {
       apiKey: "AIzaSyAAGPNktzjNlqXirf4bq-MVYRynW88oiP4",
       authDomain: "fraseo-marketing-digital.firebaseapp.com",
@@ -133,11 +139,7 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-
-    const allowedUsers = [
-      "test@client.com",
-      "k.binuta@icloud.com"
-    ];
+    const db = getFirestore(app);
 
     const errorMessage = document.getElementById("errorMessage");
 
@@ -162,22 +164,47 @@
 
     };
 
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
 
       if (!user) return;
 
       const userEmail = user.email.toLowerCase();
 
-      if (allowedUsers.includes(userEmail)) {
+      try {
 
-        window.location.href = "https://xpanol.github.io/CUSTOMEE/";
+        const accessRef = doc(
+          db,
+          "marketing_digital",
+          userEmail
+        );
 
-      } else {
+        const accessSnap = await getDoc(accessRef);
+
+        if (
+          accessSnap.exists() &&
+          accessSnap.data().active === true
+        ) {
+
+          window.location.href =
+            "https://xpanol.github.io/CUSTOMEE/";
+
+        } else {
+
+          errorMessage.style.display = "block";
+          errorMessage.innerText =
+            "Access denied for this account";
+
+          await signOut(auth);
+
+        }
+
+      } catch (error) {
 
         errorMessage.style.display = "block";
-        errorMessage.innerText = "Access denied for this account";
+        errorMessage.innerText =
+          "Error checking access permissions";
 
-        signOut(auth);
+        await signOut(auth);
 
       }
 
