@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>MARKETING DIGITAL | DIGITAL MARKETING BY XPAÑOL</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Special Elite', cursive;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: #7c3aed;
+      color: #111;
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 420px;
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 26px;
+    }
+
+    .xpanyol {
+      display: block;
+      font-size: 16px;
+      margin-top: 6px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 12px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      background: #111;
+      color: white;
+      cursor: pointer;
+    }
+
+    .error {
+      display: none;
+      margin-top: 10px;
+      color: red;
+      font-size: 14px;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <div id="loginOverlay" class="overlay">
+
+    <div class="modal">
+
+      <h2>
+        MARKETING DIGITAL | DIGITAL MARKETING
+        <span class="xpanyol">BY XPAÑOL</span>
+      </h2>
+
+      <input id="email" type="email" placeholder="Email">
+      <input id="password" type="password" placeholder="Password">
+
+      <button id="loginBtn">Login</button>
+
+      <div id="errorMessage" class="error">
+        Access denied
+      </div>
+
+    </div>
+
+  </div>
+
+  <script type="module">
+
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
+
+    import {
+      getAuth,
+      onAuthStateChanged,
+      signInWithEmailAndPassword,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
+
+    import {
+      getFirestore,
+      doc,
+      getDoc
+    } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAAGPNktzjNlqXirf4bq-MVYRynW88oiP4",
+      authDomain: "fraseo-marketing-digital.firebaseapp.com",
+      projectId: "fraseo-marketing-digital",
+      storageBucket: "fraseo-marketing-digital.firebasestorage.app",
+      messagingSenderId: "238473898395",
+      appId: "1:238473898395:web:ec7763b50c31d486d6193e",
+      measurementId: "G-E467P2RFWZ"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const params = new URLSearchParams(window.location.search);
+    const nextUrl = params.get("next");
+    const defaultHubUrl = "https://xpanol.github.io/DIGITAL-MARKETING-HUB/";
+
+    function getSafeRedirectUrl() {
+      if (!nextUrl) return defaultHubUrl;
+
+      try {
+        const parsedUrl = new URL(nextUrl);
+
+        if (parsedUrl.origin === "https://xpanol.github.io") {
+          return parsedUrl.href;
+        }
+      } catch (error) {}
+
+      return defaultHubUrl;
+    }
+
+    const errorMessage = document.getElementById("errorMessage");
+
+    document.getElementById("loginBtn").onclick = async () => {
+
+      errorMessage.style.display = "none";
+
+      const email = document.getElementById("email").value.trim().toLowerCase();
+
+      const password = document.getElementById("password").value;
+
+      try {
+
+        await signInWithEmailAndPassword(auth, email, password);
+
+      } catch (e) {
+
+        errorMessage.style.display = "block";
+        errorMessage.innerText = "Invalid login or password";
+
+      }
+
+    };
+
+    onAuthStateChanged(auth, async (user) => {
+
+      if (!user) return;
+
+      const userEmail = user.email.toLowerCase();
+
+      try {
+
+        const accessRef = doc(
+          db,
+          "marketing_digital",
+          userEmail
+        );
+
+        const accessSnap = await getDoc(accessRef);
+
+        if (
+          accessSnap.exists() &&
+          accessSnap.data().active === true
+        ) {
+
+          window.location.href =
+            getSafeRedirectUrl();
+
+        } else {
+
+          errorMessage.style.display = "block";
+          errorMessage.innerText =
+            "Access denied for this account";
+
+          await signOut(auth);
+
+        }
+
+      } catch (error) {
+
+        errorMessage.style.display = "block";
+        errorMessage.innerText =
+          "Error checking access permissions";
+
+        await signOut(auth);
+
+      }
+
+    });
+
+  </script>
+
+</body>
+
+</html>
